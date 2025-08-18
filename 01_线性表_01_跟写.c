@@ -84,7 +84,6 @@ void Init_List(LINKLIST *head)
     if (*head == NULL) {
         printf("内存分配失败\n");
         exit(1); // 解释：内存分配失败，程序异常结束
-
     }
     (*head)->next = NULL;
     (*head)->data = 0; // 头节点的data域存储链表长度
