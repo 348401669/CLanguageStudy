@@ -13,6 +13,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+// 在文件开头添加头文件
+#include <time.h>
 
 #define MAXSIZE 10000
 #define OK 1
@@ -53,10 +55,12 @@ Status InitList(SqList *L) {
  * @brief 判断顺序表是否为空
  *
  * @param L 顺序表指针
- * @return int 0：空 1：非空
+ * @return int 0：空 1：非空 -1：顺序表不存在
  */
 int isListEmpty(SqList *L) {
   if (!L)
+    return -1;
+  if (L->length == 0)
     return 0;
   return 1;
 }
@@ -66,15 +70,22 @@ int isListEmpty(SqList *L) {
  * @param L 顺序表指针
  * @return int 顺序表长度
  */
-int getListLength(SqList *L) { return L->length; }
+int getListLength(SqList *L) {
+  if (!L)
+    return -1;
+  return L->length;
+}
 
 // 在头部插入元素
 void insertListHead(SqList *L, ElemType elem) {
   if (!L || !L->elem)
     return;
   int len = getListLength(L);
-  for (int i = len - 1; i >= 0; i--) {
-    L->elem[i + 1] = L->elem[i];
+  // 检查顺序表是否已满
+  if (len >= MAXSIZE)
+    return;
+  for (int i = len; i > 0; i--) {
+    L->elem[i] = L->elem[i - 1];
   }
   L->elem[0] = elem;
   L->length++;
@@ -110,8 +121,8 @@ Status insertElem(SqList *L, int pos, ElemType elem) {
   if (len >= MAXSIZE)
     return OVERFLOW;
   // 从后往前移动元素
-  for (int i = len - 1; i >= pos - 1; i--) {
-    L->elem[i + 1] = L->elem[i];
+  for (int i = len; i > pos; i--) {
+    L->elem[i] = L->elem[i - 1];
   }
   // 插入元素
   L->elem[pos - 1] = elem;
@@ -120,6 +131,19 @@ Status insertElem(SqList *L, int pos, ElemType elem) {
   // 打印顺序表
   printAllElem(L, L->elem);
   return OK;
+}
+
+// 获取元素的位置
+int getIndex(SqList *L, ElemType e) {
+  if (!L || !L->elem)
+    return -1;
+  int len = getListLength(L);
+  for (int i = 0; i < len; i++) {
+    if (L->elem[i] == e) {
+      return i + 1;
+    }
+  }
+  return 0;
 }
 
 // 获取单个元素
@@ -141,6 +165,11 @@ Status deleteElem(SqList *L, int pos) {
   int len = getListLength(L);
   if (pos < 1 || pos > len)
     return ERROR;
+  // 这里使用 len - 1 是因为我们要将删除位置之后的元素依次向前移动一位。
+  // len 表示当前顺序表的长度，数组下标从 0 开始，最后一个元素的下标是 len - 1。
+  // 我们需要将从 pos - 1
+  // 位置之后的元素依次向前覆盖，所以循环到倒数第二个元素（即 len - 2）即可，
+  // 因此循环条件为 i < len - 1，这样能确保所有需要移动的元素都被正确处理。
   for (int i = pos - 1; i < len - 1; i++) {
     L->elem[i] = L->elem[i + 1];
   }
@@ -167,7 +196,11 @@ Status printAllElem(SqList *L, ElemType *elem) {
   return OK;
 }
 
+// 在main函数开始处添加
 int main() {
+  // 添加随机数种子初始化
+  srand((unsigned int)time(NULL));
+
   // 声明一个顺序表变量 L，用于后续操作
   SqList *L = (SqList *)malloc(sizeof(SqList));
   if (!L) {
@@ -241,7 +274,7 @@ int main() {
     printf("（5）获取顺序表的元素\n");
     printf("第5个元素是：%d\n", getElem(L, 5));
     printf("第10个元素是：%d\n", getElem(L, 10));
-    printf("第11个元素是：%d\n", getElem(L, 12));
+    printf("第12个元素是：%d\n", getElem(L, 12));
 
     // （6）打印顺序表的全部元素
     printf("（6）打印顺序表的全部元素\n");
@@ -250,6 +283,15 @@ int main() {
     // (7) 删除元素
     printf("（7）删除元素\n");
     deleteElem(L, 12);
+    // (8) 查找元素的位置
+    int search = 300;
+    printf("（8）查找元素%d的位置\n", search);
+    int pos = getIndex(L, search);
+    if (pos == 0) {
+      printf("元素不存在\n");
+    } else {
+      printf("元素的位置是：%d\n", pos);
+    }
 
     printAllElem(L, L->elem);
 
