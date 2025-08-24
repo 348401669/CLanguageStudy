@@ -30,7 +30,7 @@ typedef struct {
 
 // 函数声明
 Status InitList(SqList *L);
-Status printAllElem(SqList *L, ElemType *elem);
+Status printAllElem(SqList *L);
 int isListEmpty(SqList *L);
 int getListLength(SqList *L);
 void insertListHead(SqList *L, ElemType elem);
@@ -90,7 +90,7 @@ void insertListHead(SqList *L, ElemType elem) {
   L->elem[0] = elem;
   L->length++;
   // 打印顺序表
-  printAllElem(L, L->elem);
+  printAllElem(L);
 }
 
 // 在尾部插入元素
@@ -101,7 +101,7 @@ void insertListTail(SqList *L, ElemType elem) {
   L->elem[len] = elem;
   L->length++;
   // 打印顺序表
-  printAllElem(L, L->elem);
+  printAllElem(L);
 }
 
 /**
@@ -129,7 +129,7 @@ Status insertElem(SqList *L, int pos, ElemType elem) {
   // 更新顺序表的长度
   L->length++;
   // 打印顺序表
-  printAllElem(L, L->elem);
+  printAllElem(L);
   return OK;
 }
 
@@ -175,7 +175,7 @@ Status deleteElem(SqList *L, int pos) {
   }
   L->length--;
   // 打印顺序表
-  printAllElem(L, L->elem);
+  printAllElem(L);
   return OK;
 }
 
@@ -186,7 +186,7 @@ Status deleteElem(SqList *L, int pos) {
  * @param elem 元素数组
  * @return Status 打印状态
  */
-Status printAllElem(SqList *L, ElemType *elem) {
+Status printAllElem(SqList *L) {
   if (!L || !L->elem)
     return ERROR;
   for (int i = 0; i < L->length; i++) {
@@ -278,7 +278,7 @@ int main() {
 
     // （6）打印顺序表的全部元素
     printf("（6）打印顺序表的全部元素\n");
-    printAllElem(L, L->elem);
+    printAllElem(L);
 
     // (7) 删除元素
     printf("（7）删除元素\n");
@@ -293,7 +293,7 @@ int main() {
       printf("元素的位置是：%d\n", pos);
     }
 
-    printAllElem(L, L->elem);
+    printAllElem(L);
 
     // printf("顺序表的长度为：%d\n", L->length);
     // for(int i=0;i<L->length;i++){
