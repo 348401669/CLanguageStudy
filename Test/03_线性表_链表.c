@@ -86,6 +86,7 @@ int main() {
   deleteLast(L);
   deleteFirst(L);
   clearList(L);
+  destroyList(&L);
 
   return 0;
 }
