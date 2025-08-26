@@ -25,10 +25,6 @@
 // 1. 可以循环遍历
 // 2. 插入和删除操作方便
 // 3. 占用内存多
-// 循环链表的缺点：
-// 1. 遍历比较麻烦
-// 2. 插入和删除操作麻烦
-// 3. 占用内存多
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -53,7 +49,11 @@ void printList(LinkList L);
 int getLen(LinkList L);
 Status insertFromTail(LinkList L, ElemType elem);
 Status insert(LinkList L, int pos, ElemType elem);
+Status deleteFirst(LinkList L);
+Status deleteLast(LinkList L);
 Status delete(LinkList L, int pos);
+Status clearList(LinkList L);
+Status destroyList(LinkList *L);
 
 // 主函数
 int main() {
@@ -83,6 +83,9 @@ int main() {
   insert(L, 100, 999);
 
   delete (L, 3);
+  deleteLast(L);
+  deleteFirst(L);
+  clearList(L);
 
   return 0;
 }
@@ -118,6 +121,10 @@ Status InitList(LinkList *L) {
 
 // 函数：判断链表是否为空
 bool isEmpty(LinkList L) {
+  if (L == NULL) {
+    printf("链表不存在\n");
+    return true;
+  }
   if (L->next == NULL) {
     printf("链表为空\n");
     return true;
@@ -142,6 +149,11 @@ int getLen(LinkList L) {
 // 参数：L 链表头指针
 // 返回值：无
 void printList(LinkList L) {
+  if (L->next == NULL) {
+    printf("链表为空\n");
+    return;
+  }
+
   Node *cur = L->next;
   printf("链表元素为：");
   while (cur != NULL) {
@@ -156,7 +168,12 @@ void printList(LinkList L) {
 
 // 函数：带头结点的链表插入元素
 // 头插法：在头结点之后插入元素
+
 Status insertFromHead(LinkList L, ElemType elem) {
+  if (L == NULL) {
+    printf("链表不存在\n");
+    return ERROR;
+  }
   Node *newNode = createNode(elem);
   if (!newNode) {
     printf("内存分配失败\n");
@@ -169,15 +186,23 @@ Status insertFromHead(LinkList L, ElemType elem) {
 }
 
 // 尾插法：在尾结点之后插入元素
+
 Status insertFromTail(LinkList L, ElemType elem) {
-  Node *newNode = createNode(elem);
-  if (!newNode)
+  if (L == NULL) {
+    printf("链表不存在\n");
     return ERROR;
+  }
+
+  Node *newNode = createNode(elem);
+  if (!newNode) {
+    return ERROR;
+  }
+
   Node *cur = L;
   while (cur->next) {
     cur = cur->next;
   }
-  // 通过上面的循环，求得尾结点的前驱cur
+
   newNode->next = cur->next;
   cur->next = newNode;
   printList(L);
@@ -186,19 +211,16 @@ Status insertFromTail(LinkList L, ElemType elem) {
 
 // 指定位置插入法：在指定位置的插入元素
 Status insert(LinkList L, int pos, ElemType elem) {
+  // 如果插入位置小于等于0，直接报错
+  if (pos <= 0 || L == NULL) {
+    printf("插入位置错误或链表不存在\n");
+    return ERROR;
+  }
   Node *newNode = createNode(elem);
   if (newNode == NULL) {
     printf("内存分配失败\n");
     return ERROR;
   }
-  Node *cur = L->next;
-  int i = 1;
-  // 如果插入位置小于等于0，直接报错
-  if (pos <= 0) {
-    printf("插入位置错误,插入位置从1开始。\n");
-    return ERROR;
-  }
-
   // 如果插入位置为1，则是在头后面插入
   if (pos == 1) {
     newNode->next = L->next;
@@ -206,9 +228,12 @@ Status insert(LinkList L, int pos, ElemType elem) {
     printList(L);
     return OK;
   }
+
   // 如果插入位置不为1，则是在内部（或尾部）插入
   // 找到插入位置的前驱指针
   // 当pos大于列表的长度时，则是在尾部插入（下面的逻辑参插入到最后一个元素的后面）
+  Node *cur = L->next;
+  int i = 1;
   while (cur->next && i < pos - 1) {
     cur = cur->next;
     ++i;
@@ -216,6 +241,37 @@ Status insert(LinkList L, int pos, ElemType elem) {
   // 插入元素逻辑
   newNode->next = cur->next;
   cur->next = newNode;
+  printList(L);
+  return OK;
+}
+
+// 删除头结点
+Status deleteFirst(LinkList L) {
+  if (L->next == NULL) {
+    printf("链表为空，无法删除头结点\n");
+    return ERROR;
+  }
+  Node *del = L->next;
+  L->next = del->next;
+  free(del);
+  printList(L);
+  return OK;
+}
+
+// 删除尾结点
+Status deleteLast(LinkList L) {
+  if (L->next == NULL) {
+    printf("链表为空，无法删除尾结点\n");
+    return ERROR;
+  }
+  Node *cur = L;
+  // 找到尾结点的前驱结点
+  while (cur->next && cur->next->next) {
+    cur = cur->next;
+  }
+  Node *del = cur->next;
+  cur->next = NULL;
+  free(del);
   printList(L);
   return OK;
 }
@@ -228,7 +284,8 @@ Status delete(LinkList L, int pos) {
   }
   Node *cur = L;
   int i = 0;
-  while (cur && i < pos) {
+  // 找到要删除结点的前驱结点
+  while (cur && i < pos - 1) {
     cur = cur->next;
     ++i;
   }
@@ -236,6 +293,42 @@ Status delete(LinkList L, int pos) {
     printf("删除位置错误,删除位置超出链表长度。\n");
     return ERROR;
   }
+  Node *del = cur->next;
+  cur->next = del->next;
+  free(del);
   printList(L);
+  return OK;
+}
+
+// 清空链表
+// 当前代码存在一个小问题，`cur` 初始化为 `L`
+// 后，在循环里未使用到该初始化值，后续 `cur` 直接被赋值为 `L->next`。
+// 这里可以直接在循环内部定义 `cur` 变量，逻辑更清晰。同时 `printList`
+// 在链表为空时会引发逻辑问题，因为会尝试获取 `L->next` 并遍历。
+// 以下是修正后的代码：
+Status clearList(LinkList L) {
+  Node *cur;
+  while (L->next) {
+    cur = L->next;
+    L->next = cur->next;
+    free(cur);
+  }
+  L->next = NULL;
+  printf("链表已清空\n");
+  return OK;
+}
+
+// 销毁链表
+// 当前代码存在问题，`destroyList` 函数接收的是一级指针，
+// 在调用该函数后，原链表头指针仍指向已释放的内存，会形成野指针。
+// 应使用二级指针，以便在函数内部修改头指针本身，使其指向 NULL，避免野指针问题。
+Status destroyList(LinkList *L) {
+  if (L == NULL || *L == NULL) {
+    return ERROR;
+  }
+  clearList(*L);
+  free(*L);
+  *L = NULL;
+  printf("链表已销毁\n");
   return OK;
 }
