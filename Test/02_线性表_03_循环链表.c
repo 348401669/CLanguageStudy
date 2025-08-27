@@ -24,6 +24,8 @@ Status insert(LinkList L, int pos, ElemType elem);
 Status deleteFromHead(LinkList L);
 Status deleteFromTail(LinkList L);
 Status delete(LinkList L, int pos);
+Status clearList(LinkList L);
+Status destroyList(LinkList *L);
 
 int main() {
   // 指针
@@ -51,6 +53,9 @@ int main() {
   delete (L, 100);
   // 判空（其逻辑中包含获取链表长度）
   isEmpty(L);
+  clearList(L);
+  destroyList(&L);
+  return 0;
 }
 
 // 1 初始化循环链表
@@ -91,7 +96,7 @@ int getLen(LinkList L) {
     cur = cur->next;
     ++len;
   }
-  printf("链表的长度为：%d", len);
+  printf("链表的长度为：%d\n", len);
   return len;
 }
 
@@ -184,6 +189,7 @@ Status deleteFromHead(LinkList L) {
   Node *del = L->next;
   L->next = del->next;
   free(del);
+  printf("删除首元结点\n");
   printList(L);
   return OK;
 }
@@ -200,7 +206,8 @@ Status deleteFromTail(LinkList L) {
   }
   Node *del = cur->next;
   cur->next = L;
-  free(cur->next);
+  free(del);
+  printf("删除尾结点\n");
   printList(L);
   return 0;
 }
@@ -214,12 +221,42 @@ Status delete(LinkList L, int pos) {
 
   Node *cur = L;
   int i = 0;
-  while (cur->next->next != L & i < pos - 1) {
+  while (cur->next->next != L && i < pos - 1) {
     cur = cur->next;
     ++i;
   }
   Node *del = cur->next;
   cur->next = del->next;
+  free(del);
+  printf("删除pos=%d号结点\n", pos);
   printList(L);
   return 0;
+}
+
+// 12 清除所有节点（除了头结点）
+Status clearList(LinkList L) {
+  Node *cur = L;
+  while (!isEmpty(L)) {
+    deleteFromHead(L);
+  }
+  printf("链表已清空\n");
+  return OK;
+}
+
+// 13 释放链表
+// 销毁循环链表，释放链表占用的所有内存
+Status destroyList(LinkList *L) {
+  // 检查链表指针是否为空，若为空则返回错误
+  if (*L == NULL) {
+    return ERROR;
+  }
+  // 清除链表中除头结点外的所有节点
+  clearList(*L);
+  // 释放头结点的内存
+  free(*L);
+  // 悬空指针是指指针指向的内存已被释放，但指针仍然保留该内存地址。
+  // 将链表指针置为 NULL，避免程序后续误操作已释放的内存，从而避免悬空指针问题。
+  *L = NULL;
+  // 操作成功，返回 OK
+  return OK;
 }
