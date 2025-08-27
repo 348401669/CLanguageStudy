@@ -15,14 +15,22 @@ typedef struct node {
 // 函数原型签名
 Status initList(LinkList *L);
 Node *createNode(ElemType elem);
+bool isEmpty(LinkList L);
+int getLen(LinkList L);
 void printList(LinkList L);
 Status insertFromHead(LinkList L, ElemType elem);
 Status insertFromTail(LinkList L, ElemType elem);
 Status insert(LinkList L, int pos, ElemType elem);
+Status deleteFromHead(LinkList L);
+Status deleteFromTail(LinkList L);
+Status delete(LinkList L, int pos);
 
 int main() {
+  // 指针
   LinkList L;
+  //   初始化循环链表
   initList(&L);
+  //   插入结点
   insertFromHead(L, 1);
   insertFromHead(L, 2);
   insertFromHead(L, 3);
@@ -34,6 +42,15 @@ int main() {
   insertFromTail(L, 9);
   insertFromTail(L, 10);
   insert(L, 0, 100);
+  // 删除结点
+  deleteFromHead(L);
+  deleteFromTail(L);
+  delete (L, 0);
+  delete (L, 1);
+  delete (L, 4);
+  delete (L, 100);
+  // 判空（其逻辑中包含获取链表长度）
+  isEmpty(L);
 }
 
 // 初始化循环链表
@@ -55,6 +72,27 @@ Node *createNode(ElemType elem) {
   node->data = elem;
   node->next = NULL;
   return node;
+}
+// 判空
+bool isEmpty(LinkList L) {
+  if (L->next == L) {
+    printf("链表为空\n");
+    return true;
+  }
+  printf("链表非空\n");
+  getLen(L);
+  return false;
+}
+// 求长
+int getLen(LinkList L) {
+  int len = 0;
+  Node *cur = L;
+  while (cur->next != L) {
+    cur = cur->next;
+    ++len;
+  }
+  printf("链表的长度为：%d", len);
+  return len;
 }
 
 // 打印链表
@@ -136,4 +174,52 @@ Status insert(LinkList L, int pos, ElemType elem) {
   cur->next = newNode;
   printList(L);
   return OK;
+}
+
+// 删除首元结点
+Status deleteFromHead(LinkList L) {
+  if (L->next == L) {
+    return ERROR;
+  }
+  Node *del = L->next;
+  L->next = del->next;
+  free(del);
+  printList(L);
+  return OK;
+}
+// 删除尾结点
+Status deleteFromTail(LinkList L) {
+  // 如果链表不存在 或 是空链表，直接报错
+  if (!L || L->next == L) {
+    return ERROR;
+  }
+  // 找到尾结点的前驱结点
+  Node *cur = L;
+  while (cur->next->next != L) {
+    cur = cur->next;
+  }
+  Node *del = cur->next;
+  cur->next = L;
+  free(cur->next);
+  printList(L);
+  return 0;
+}
+
+// 删除任意结点
+Status delete(LinkList L, int pos) {
+  if (!L || L->next == L || pos <= 0) {
+    printf("不能是空链表||pos不能小于等于0\n");
+    return ERROR;
+  }
+
+  Node *cur = L;
+  int i = 0;
+  while (cur->next->next != L & i < pos - 1) {
+    cur = cur->next;
+    ++i;
+  }
+  Node *del = cur->next;
+  cur->next = del->next;
+  printList(L);
+  return 0;
 }
