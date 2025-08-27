@@ -53,7 +53,7 @@ int main() {
   isEmpty(L);
 }
 
-// 初始化循环链表
+// 1 初始化循环链表
 Status initList(LinkList *L) { // *L 指向头指针
   *L = (LinkList)malloc(sizeof(Node));
   if (*L == NULL) {
@@ -63,7 +63,7 @@ Status initList(LinkList *L) { // *L 指向头指针
   return OK;
 }
 
-// 创建单个结点，返回结点指针
+// 2 创建单个结点，返回结点指针
 Node *createNode(ElemType elem) {
   Node *node = (Node *)malloc(sizeof(Node));
   if (node == NULL) {
@@ -73,7 +73,7 @@ Node *createNode(ElemType elem) {
   node->next = NULL;
   return node;
 }
-// 判空
+// 3 判空
 bool isEmpty(LinkList L) {
   if (L->next == L) {
     printf("链表为空\n");
@@ -83,7 +83,7 @@ bool isEmpty(LinkList L) {
   getLen(L);
   return false;
 }
-// 求长
+// 4 求长
 int getLen(LinkList L) {
   int len = 0;
   Node *cur = L;
@@ -95,7 +95,7 @@ int getLen(LinkList L) {
   return len;
 }
 
-// 打印链表
+// 5 打印链表
 void printList(LinkList L) {
   Node *cur = L->next;
   while (cur->next != L) {
@@ -106,7 +106,7 @@ void printList(LinkList L) {
   printf("\n");
 }
 
-// 在头部后面插入
+// 6 在头部后面插入
 Status insertFromHead(LinkList L, ElemType elem) {
   Node *newNode = createNode(elem);
   if (newNode == NULL)
@@ -117,7 +117,7 @@ Status insertFromHead(LinkList L, ElemType elem) {
   return OK;
 }
 
-// 在尾部后面插入
+// 7 在尾部后面插入
 Status insertFromTail(LinkList L, ElemType elem) {
   Node *newNode = createNode(elem);
   if (newNode == NULL)
@@ -135,7 +135,7 @@ Status insertFromTail(LinkList L, ElemType elem) {
   return OK;
 }
 
-// 在任意位置pos插入
+// 8 在任意位置pos插入
 Status insert(LinkList L, int pos, ElemType elem) {
   // 参数验证：检查链表是否存在
   if (L == NULL) {
@@ -176,7 +176,7 @@ Status insert(LinkList L, int pos, ElemType elem) {
   return OK;
 }
 
-// 删除首元结点
+// 9 删除首元结点
 Status deleteFromHead(LinkList L) {
   if (L->next == L) {
     return ERROR;
@@ -187,7 +187,7 @@ Status deleteFromHead(LinkList L) {
   printList(L);
   return OK;
 }
-// 删除尾结点
+// 10 删除尾结点
 Status deleteFromTail(LinkList L) {
   // 如果链表不存在 或 是空链表，直接报错
   if (!L || L->next == L) {
@@ -205,7 +205,7 @@ Status deleteFromTail(LinkList L) {
   return 0;
 }
 
-// 删除任意结点
+// 11 删除任意结点
 Status delete(LinkList L, int pos) {
   if (!L || L->next == L || pos <= 0) {
     printf("不能是空链表||pos不能小于等于0\n");
