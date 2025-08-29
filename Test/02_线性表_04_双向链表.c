@@ -169,7 +169,7 @@ Status insert(LinkList L, int pos, ElemType elem) {
   return OK;
 }
 
-// 9 删头
+// 9 删首元
 
 // 10 删尾
 
