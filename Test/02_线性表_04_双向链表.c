@@ -1,3 +1,9 @@
+// 双向链表
+// 双向链表的每个结点包含一个数据元素和两个指针，一个指向前驱结点，一个指向后继结点。
+// 双向链表的头结点的前驱指针为空，尾结点的后继指针为空。
+
+// todo 删指定位置 （ delete(L, 1)有问题，并没有邮删除）
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +27,11 @@ void printList(LinkList L);
 Status insertHead(LinkList L, ElemType elem);
 Status insertTail(LinkList L, ElemType elem);
 Status insert(LinkList L, int pos, ElemType elem);
+Status deleteHead(LinkList L);
+Status deleteTail(LinkList L);
+Status delete(LinkList L, int pos);
+Status clearList(LinkList L);
+Status destroyList(LinkList *L);
 
 int main() {
   LinkList L;
@@ -45,6 +56,20 @@ int main() {
   insert(L, 1, 1024);
   insert(L, 14, 2048);
   printList(L);
+  deleteHead(L);
+  deleteTail(L);
+  // delete (L, 1);
+  delete (L, 3);
+  delete (L, 5);
+  delete (L, 7);
+  delete (L, 10);
+  // if (!isEmpty(L)) {
+  //   delete (L, 1);
+  // }
+  // clearList(L);
+  destroyList(&L);
+
+  return 0;
 }
 
 // 1 创建结点
@@ -89,22 +114,22 @@ int getLen(LinkList L) {
 bool isEmpty(LinkList L) {
   if (getLen(L) == 0) {
     printf("链表为空\n");
-    return false;
+    return true;
   }
   printf("链表不为空\n");
-  return true;
+  return false;
 }
 
 // 5 打印链表
 void printList(LinkList L) {
-  Node *cur = L;
-  if (getLen(L) == 0) {
-    printf("Head");
+  if (!L) {
+    printf("链表未初始化\n");
     return;
   }
   printf("Head");
-  while (cur->next) {
-    printf("<=>%d", cur->next->data);
+  Node *cur = L->next;
+  while (cur) {
+    printf("<=>%d", cur->data);
     cur = cur->next;
   }
   printf("\n");
@@ -170,11 +195,86 @@ Status insert(LinkList L, int pos, ElemType elem) {
 }
 
 // 9 删首元
+Status deleteHead(LinkList L) {
+  if (!L || !L->next)
+    return ERROR;
+  Node *del = L->next;
+  L->next = del->next;
+  free(del);
+  printf("删除首元成功\n");
+  printList(L);
+  return OK;
+}
 
 // 10 删尾
+Status deleteTail(LinkList L) {
+  if (!L || !L->next)
+    return ERROR;
+  Node *cur = L;
+  while (cur->next) {
+    cur = cur->next;
+  }
+  cur->prev->next = NULL;
+  free(cur);
+  printf("删除尾结点成功\n");
+  printList(L);
+  return OK;
+}
 
-// 11 删指定位置
+// 11 删指定位置 （todo: delete(L,1)有问题，并没有邮删除）
+Status delete(LinkList L, int pos) {
+  if (!L || !L->next || pos <= 0) {
+    printf("参数错误或链表为空\n");
+    return ERROR;
+  }
 
-// 12 清空链表
+  Node *cur = L->next; // 指向首元节点
+  int i = 1;           // 从1开始计数
+
+  // 找到第pos个节点
+  while (cur != NULL && i < pos) {
+    cur = cur->next;
+    ++i;
+  }
+
+  if (cur == NULL) { // pos超出链表长度
+    printf("位置%d超出链表范围\n", pos);
+    return ERROR;
+  }
+
+  // 删除节点
+  cur->prev->next = cur->next;
+  if (cur->next != NULL) {
+    cur->next->prev = cur->prev;
+  }
+
+  free(cur);
+  printf("删除链表第%d个元素成功\n", pos);
+  printList(L);
+  return OK;
+}
+
+// 12 清空链表（循环删除首元结点）
+Status clearList(LinkList L) {
+  if (!L)
+    return ERROR;
+  // Node *cur = L->next;
+  while (L->next) {
+    deleteHead(L);
+  }
+
+  printf("链表已清空");
+  return OK;
+}
 
 // 13 销毁链表
+// 当前代码存在逻辑问题，判断条件 `!(*L)->next` 会导致空链表无法被销毁，
+// 并且销毁后应该将指针置为 NULL 避免野指针。以下是修正后的代码。
+Status destroyList(LinkList *L) {
+  if (!(*L))
+    return ERROR;
+  clearList(*L);
+  free(*L);
+  *L = NULL; // 头指针置为空，避免野指针
+  return OK;
+}

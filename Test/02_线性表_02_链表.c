@@ -81,7 +81,7 @@ int main() {
   insert(L, 3, 777);
   // 当pos大于列表长度时，直接在尾部插入
   insert(L, 100, 999);
-
+  delete (L, 1);
   delete (L, 3);
   deleteLast(L);
   deleteFirst(L);
