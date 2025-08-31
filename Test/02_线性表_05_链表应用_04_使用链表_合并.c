@@ -34,8 +34,10 @@ int main() {
   // 调用mergeList函数，合并两个有序链表
   mergeList(L1, L2, &U); // 修复：传递&U而不是U
 
-  printf("合并后的链表: ");
+  printf("合并后的链表: \n");
   printList(U);
+  printList(L1);
+  printList(L2);
 
   // 调用destroyList函数，销毁链表
   destroyList(&U);
@@ -46,6 +48,8 @@ int main() {
 }
 
 // 简洁版：合并两个有序链表并去重
+// 修复后的mergeList函数:在合并过程中 复用原链表的结点
+// ，而不是创建新结点。这样就不会产生内存泄漏：
 Status mergeList(LinkList L1, LinkList L2, LinkList *U) {
   if (!L1 || !L2 || !U)
     return ERROR;
@@ -53,65 +57,50 @@ Status mergeList(LinkList L1, LinkList L2, LinkList *U) {
   Node *cur1 = L1->next;
   Node *cur2 = L2->next;
   Node *curU = *U;
-  Node *newNode;
 
   // 合并两个有序链表并去重
   while (cur1 && cur2) {
     if (cur1->data == cur2->data) {
-      // 值相同，只插入一个
-      newNode = createNode(cur1->data);
-      if (!newNode)
-        return ERROR;
-      curU->next = newNode;
+      // 值相同，使用L1的结点
+      curU->next = cur1;
       curU = curU->next;
 
       // 跳过重复值
       int val = cur1->data;
-      while (cur1 && cur1->data == val)
+      while (cur1 && cur1->data == val) {
+        Node *temp = cur1;
         cur1 = cur1->next;
-      while (cur2 && cur2->data == val)
+        if (temp != curU)
+          free(temp); // 释放重复结点
+      }
+      while (cur2 && cur2->data == val) {
+        Node *temp = cur2;
         cur2 = cur2->next;
+        free(temp); // 释放L2的重复结点
+      }
     } else if (cur1->data < cur2->data) {
-      // 插入cur1的值
-      newNode = createNode(cur1->data);
-      if (!newNode)
-        return ERROR;
-      curU->next = newNode;
+      // 使用L1的结点
+      curU->next = cur1;
       curU = curU->next;
       cur1 = cur1->next;
     } else {
-      // 插入cur2的值
-      newNode = createNode(cur2->data);
-      if (!newNode)
-        return ERROR;
-      curU->next = newNode;
+      // 使用L2的结点
+      curU->next = cur2;
       curU = curU->next;
       cur2 = cur2->next;
     }
   }
 
   // 处理剩余节点
-  while (cur1) {
-    newNode = createNode(cur1->data);
-    if (!newNode)
-      return ERROR;
-    curU->next = newNode;
-    curU = curU->next;
-    cur1 = cur1->next;
+  if (cur1) {
+    curU->next = cur1;
+  } else if (cur2) {
+    curU->next = cur2;
   }
 
-  while (cur2) {
-    newNode = createNode(cur2->data);
-    if (!newNode)
-      return ERROR;
-    curU->next = newNode;
-    curU = curU->next;
-    cur2 = cur2->next;
-  }
-
-  // 清空原链表
-  clearList(L1);
-  clearList(L2);
+  // 清空原链表头结点，但不释放数据结点
+  L1->next = NULL;
+  L2->next = NULL;
 
   return OK;
 }
