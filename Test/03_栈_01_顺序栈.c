@@ -22,35 +22,43 @@ typedef struct {
 
 Status InitStack(SqStack *s);
 bool isEmpty(SqStack *s);
+bool isFull(SqStack *s);
 int getLen(SqStack *s);
 Status Push(SqStack *s, SElemType e);
-Status Pop(SqStack *s, SElemType *e);
+SElemType Pop(SqStack *s);
 SElemType getTop(SqStack *s);
+Status printStack(SqStack *s);
+Status clearStack(SqStack *s);
+Status destroyStack(SqStack *s);
 
 int main() {
   SqStack s;
   InitStack(&s);
   getLen(&s);
   getTop(&s);
+  for (int i = 10; i <= 100; i += 10) {
+    Push(&s, i);
+  }
+  printStack(&s);
+
+  for (int i = 0; i < 5; i++)
+    Pop(&s);
+  printStack(&s);
+  clearStack(&s);
+  printStack(&s);
+  destroyStack(&s);
+  printStack(&s);
 
   return 0;
 }
 
 // 函数名：InitStack
 // 功能：初始化一个顺序栈
-// 参数：
-//     s：指向 SqStack 结构体的指针，代表要初始化的顺序栈
-// 返回值：
-//     Status 类型，初始化成功返回 OK(1)，内存分配失败返回 OVERFLOW(-2)
 Status InitStack(SqStack *s) {
   // 为栈底指针分配 MAXSIZE 个 SElemType 类型元素的内存空间
   s->base = (SElemType *)malloc(MAXSIZE * sizeof(SElemType));
   // 检查内存分配是否成功，若分配失败，s->base 为 NULL
   if (!s->base) {
-    // 内存分配失败，返回 OVERFLOW 表示溢出错误
-    // 返回 OVERFLOW 更好。因为 OVERFLOW 专门定义为 -2 表示溢出错误，
-    // 在此场景下内存分配失败属于溢出错误，用 OVERFLOW 表意更精确；
-    // 而 ERROR 只是一个通用的错误标识，语义不如 OVERFLOW 明确。
     return OVERFLOW;
   }
   // 初始化栈顶指针，使其指向栈底指针的位置，此时栈为空
@@ -64,23 +72,44 @@ Status InitStack(SqStack *s) {
 }
 
 bool isEmpty(SqStack *s) {
-  if ((*s).top == (*s).base)
+  if (s->top == s->base) // 修正：使用==而不是=
     return true;
   return false;
 }
 
+bool isFull(SqStack *s) {
+  if (s->top - s->base >= s->stacksize) {
+    return true;
+  }
+  return false;
+}
+
 int getLen(SqStack *s) {
-  printf("顺序栈的长度为：%d\n", s->top - s->base);
-  return (*s).top - (*s).base;
+  int len = s->top - s->base;
+  printf("顺序栈的长度为：%d\n", len);
+  return len;
 }
 
 SElemType getTop(SqStack *s) {
   if (s->top != s->base) {
-    // 由于栈顶指针 s->top 指向栈顶元素的下一个位置，减去 1 后指向栈顶元素
-    // 解引用该指针获取栈顶元素的值并返回
-    printf("%d\n", *(s->top - 1));
-    return *(s->top - 1);
+    SElemType top = *(s->top - 1);
+    printf("栈顶元素：%d\n", top);
+    return top;
   }
+  printf("栈为空，无栈顶元素\n");
+  return 0; // 栈为空时返回0
+}
+
+Status printStack(SqStack *s) {
+  if (s->base == NULL) {
+    return ERROR;
+  }
+  printf("栈元素从栈底到栈顶为：");
+  for (SElemType *p = s->base; p < s->top; p++) {
+    printf("%d ", *p);
+  }
+  printf("\n");
+  return OK;
 }
 
 Status Push(SqStack *s, SElemType e) {
@@ -91,24 +120,53 @@ Status Push(SqStack *s, SElemType e) {
   *s->top = e;
   // 栈顶指针后移一位，指向下一个可用位置
   s->top++;
+  printf("元素 %d 入栈成功\n", e);
   return OK;
 }
 
-Status Pop(SqStack *s, SElemType *e) {
+SElemType Pop(SqStack *s) {
   if (s->top == s->base) {
     return ERROR;
   }
   // 栈顶指针先减一，指向栈顶元素
   s->top--;
   // 将栈顶元素赋值给 e
-  *e = *s->top;
+  SElemType e = *s->top;
+  printf("元素 %d 出栈成功\n", e);
+  return e;
+}
+
+Status clearStack(SqStack *s) {
+  if (s->base == NULL) {
+    return ERROR;
+  }
+  s->top = s->base;
+  printf("栈已清空\n");
   return OK;
 }
-Status clearStack(SqStack *s) { s->top = s->base; }
 
+// 函数名：destroyStack
+// 功能：销毁一个顺序栈，释放栈所占用的内存空间
+// 参数：
+//     s：指向 SqStack 结构体的指针，代表要销毁的顺序栈
+// 返回值：
+//     返回 Status 类型，销毁成功返回 OK，若栈已为空则返回 ERROR
 Status destroyStack(SqStack *s) {
+  // 检查栈底指针是否为 NULL，若为 NULL 说明栈已为空，返回 ERROR
+  if (s->base == NULL) {
+    return ERROR;
+  }
+  // 释放栈底指针指向的内存空间
   free(s->base);
+  // 将栈底指针置为 NULL，避免悬空指针
   s->base = NULL;
+  // 将栈顶指针置为 NULL，避免悬空指针
   s->top = NULL;
+  // 将栈的容量置为 0
   s->stacksize = 0;
+  // 输出栈已销毁的信息，包含栈底指针、栈顶指针和栈容量
+  printf("栈已销毁，base：%p，top：%p，stacksize：%d\n", s->base, s->top,
+         s->stacksize);
+  // 销毁成功，返回 OK
+  return OK;
 }
