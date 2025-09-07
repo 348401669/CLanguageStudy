@@ -92,11 +92,13 @@ Status mergeList(LinkList L1, LinkList L2, LinkList *U) {
   }
 
   // 处理剩余节点
-  if (cur1) {
-    curU->next = cur1;
-  } else if (cur2) {
-    curU->next = cur2;
-  }
+  // if (cur1) {
+  //   curU->next = cur1;
+  // } else if (cur2) {
+  //   curU->next = cur2;
+  // }
+  // 上述if语句，改用三元表达试，更简洁
+  curU->next = cur1 ? cur1 : cur2;
 
   // 清空原链表头结点，但不释放数据结点
   L1->next = NULL;
